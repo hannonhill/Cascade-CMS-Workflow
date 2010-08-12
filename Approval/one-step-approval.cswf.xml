@@ -1,0 +1,75 @@
+<?xml version="1.0"?>
+<system-workflow-definition name="Admin Approval" initial-step="initialize">
+   <triggers>
+      <trigger name="email" class="com.cms.workflow.function.EmailProvider"/>
+      <trigger name="publish" class="com.cms.workflow.function.Publisher"/>
+      <trigger name="assign-to-owner" class="com.cms.workflow.function.AssignToWorkflowOwner"/>
+      <trigger name="preserve-current-user" class="com.cms.workflow.function.PreserveCurrentUser"/>
+      <trigger name="merge" class="com.cms.workflow.function.Merge"/>
+      <trigger name="assign-to-group" class="com.cms.workflow.function.AssignToSpecifiedGroup"/>
+   </triggers>
+   <steps>
+      <step type="system" identifier="initialize" label="Initialize Workflow">
+         <actions>
+            <action identifier="notify" label="Send e-mail notification" move="forward" type="auto">
+               <trigger name="email"/>
+            </action>
+         </actions>
+      </step>
+      <step type="transition" identifier="approve-or-reject" label="Approve or Reject Content" default-group="Approvers">
+         <actions>
+            <action identifier="approve" label="Approve and Publish" move="forward">
+				</action>
+            <action identifier="reject" label="Reject and send for changes" next-id="owner-edits">
+               <trigger name="email"/>
+               <trigger name="assign-to-owner"/>
+            </action>
+            <action identifier="edit" label="Edit the page yourself" next-id="approver-edits">
+               <trigger name="preserve-current-user"/>
+            </action>
+         </actions>
+      </step>
+      <step type="system" identifier="save-and-publish" label="Save and Publish">
+         <actions>
+            <action identifier="save-and-publish" label="nothing" move="forward" type="auto">
+               <trigger name="merge"/>
+               <trigger name="version"/>
+               <trigger name="publish"/>
+               <trigger name="email">
+                  <parameter>
+                     <name>mode</name>
+                     <value>completed</value>
+                  </parameter>
+               </trigger>
+            </action>
+         </actions>
+      </step>
+      <step type="system" identifier="finished" label="Finished"/>
+   </steps>
+   <non-ordered-steps>
+      <step type="edit" identifier="owner-edits" label="Owner making changes" default-user="Workflow Will Assign">
+         <actions>
+            <action identifier="editing" label="Edit the page" next-id="approve-or-reject" type="auto">
+               <trigger name="email"/>
+               <!--
+                  Comment out the next trigger if you want the edited page to go back
+                  to the individual approver that requested changes
+               -->
+               <trigger name="assign-to-group">
+                  <parameter>
+                     <name>group</name>
+                     <value>Approvers</value>
+                  </parameter>
+               </trigger>
+            </action>
+         </actions>
+      </step>
+      <step type="edit" identifier="approver-edits" label="Approver making changes" default-user="Workflow Will Assign">
+         <actions>
+            <action identifier="editing" label="Edit the page" next-id="approve-or-reject" type="auto">
+               <trigger name="preserve-current-user"/>
+            </action>
+         </actions>
+      </step>
+   </non-ordered-steps>
+</system-workflow-definition>

@@ -1,0 +1,162 @@
+<?xml version="1.0"?>
+<system-workflow-definition name="Collaborative Approval" initial-step="initialize">
+   <triggers>
+      <trigger name="merge" class="com.cms.workflow.function.Merge"/>
+      <trigger name="preserveCurrentUser" class="com.cms.workflow.function.PreserveCurrentUser"/>
+      <trigger name="email" class="com.cms.workflow.function.EmailProvider"/>
+      <trigger name="assignToOwner" class="com.cms.workflow.function.AssignToWorkflowOwner"/>
+      <trigger name="publish" class="com.cms.workflow.function.Publisher"/>
+   </triggers>
+   <steps>
+      <step type="system" identifier="initialize" label="Initialization">
+         <actions>
+            <action identifier="initialize" label="Initialization" type="auto" move="forward">
+               <trigger name="assignToOwner"/>
+            </action>
+         </actions>
+      </step>
+      <!--WF OWNER ROLES-->
+      <step type="transition" identifier="owner" label="Owner" default-user="Workflow Assigned">
+         <actions>
+            <action identifier="edit" label="Edit" next-id="owner-edition">
+               <trigger name="assignToOwner"/>
+            </action>
+            <action identifier="send-to-approver" label="Send to Approver" move="forward">
+               <trigger name="email"/>
+            </action>
+            <action identifier="send-to-contributor1" label="Send to Contributor 1" next-id="contributor1-review">
+               <trigger name="email"/>
+            </action>
+            <action identifier="send-to-contributor2" label="Send to Contributor 2" next-id="contributor2-review">
+               <trigger name="email"/>
+            </action>
+            <action identifier="send-to-contributor3" label="Send to Contributor 3" next-id="contributor3-review">
+               <trigger name="email"/>
+            </action>
+         </actions>
+      </step>
+      <!--APPROVER ROLES-->
+      <step type="transition" identifier="approver-review" label="Approver Review" default-group="Approvers">
+         <actions>
+            <action identifier="send-to-owner" label="Send Back to Owner" next-id="owner-edition">
+               <trigger name="assignToOwner"/>
+               <trigger name="email"/>
+            </action>
+            <action identifier="approve-hold-publish" label="Approve but Hold for Publishing" next-id="hold-publish">
+               <trigger name="preserveCurrentUser"/>
+            </action>
+            <action identifier="approve-publish" label="Approve and Publish Now" next-id="finalize"/>
+            <action identifier="delete-workflow" label="Delete Workflow" next-id="finish"/>
+         </actions>
+      </step>
+      <!--EDITOR1 ROLES-->
+      <step type="transition" identifier="contributor1-review" label="Contributor 1 Review" allow-user-group-change="true" default-user="admin">
+         <actions>
+            <action identifier="contributor1-edit" label="Edit" next-id="contributor1-edition">
+               <trigger name="preserveCurrentUser"/>
+            </action>
+            <action identifier="send-to-owner" label="Send Back to Owner" next-id="owner">
+               <trigger name="assignToOwner"/>
+               <trigger name="email"/>
+            </action>
+         </actions>
+      </step>
+      <!--EDITOR1 ROLES-->
+      <!--EDITOR2 ROLES-->
+      <step type="transition" identifier="contributor2-review" label="Contributor 2 Review" allow-user-group-change="true" default-user="admin">
+         <actions>
+            <action identifier="contributor2-edit" label="Edit" next-id="contributor2-edition">
+               <trigger name="preserveCurrentUser"/>
+            </action>
+            <action identifier="send-to-owner" label="Send Back to Owner" next-id="owner">
+               <trigger name="assignToOwner"/>
+               <trigger name="email"/>
+            </action>
+         </actions>
+      </step>
+      <!--EDITOR2 ROLES-->
+      <!--EDITOR3 ROLES-->
+      <step type="transition" identifier="contributor3-review" label="Contributor 3 Review" allow-user-group-change="true" default-user="admin">
+         <actions>
+            <action identifier="contributor3-edit" label="Edit" next-id="contributor3-edition">
+               <trigger name="preserveCurrentUser"/>
+            </action>
+            <action identifier="send-to-owner" label="Send Back to Owner" next-id="owner">
+               <trigger name="assignToOwner"/>
+               <trigger name="email"/>
+            </action>
+         </actions>
+      </step>
+      <!--EDITOR3 ROLES-->
+      <!--PUBLISHER  ROLES-->
+      <step type="transition" identifier="hold-publish" label="Publisher" default-user="Workflow Assigned">
+         <actions>
+            <action identifier="publish" label="Save and publish" next-id="finalize"/>
+            <action identifier="no-publish" label="Save but do not publish" next-id="finish">
+               <trigger name="merge"/>
+            </action>
+         </actions>
+      </step>
+      <!--/PUBLISHER ROLES-->
+      <!--PUBLISHES-->
+      <step type="system" identifier="finalize" label="Finalizing">
+         <actions>
+            <action identifier="merge" label="Merge" type="auto" move="forward">
+               <trigger name="merge"/>
+            </action>
+         </actions>
+      </step>
+      <step type="system" identifier="publish" label="Publishing">
+         <actions>
+            <action identifier="publish" label="Completed" type="auto" move="forward">
+               <trigger name="publish"/>
+               <trigger name="email">
+                  <parameter>
+                     <name>mode</name>
+                     <value>completed</value>
+                  </parameter>
+               </trigger>
+            </action>
+         </actions>
+      </step>
+      <step type="system" identifier="finish" label="Finished"/>
+      <!--/PUBLISHES-->
+   </steps>
+   <non-ordered-steps>
+      <step type="edit" identifier="owner-edition" label="Edit Owner" default-user="Workflow Assigned">
+         <actions>
+            <action identifier="edit" label="Edit" type="auto" next-id="owner">
+               <trigger name="assignToOwner"/>
+            </action>
+         </actions>
+      </step>
+      <step type="edit" identifier="contributor1-edition" label="Edition Contributor1" default-user="Workflow Assigned">
+         <actions>
+            <action identifier="edit" label="Edit" type="auto" next-id="contributor1-review">
+               <trigger name="preserveCurrentUser"/>
+            </action>
+         </actions>
+      </step>
+      <step type="edit" identifier="contributor2-edition" label="Edition Contributor2" default-user="Workflow Assigned">
+         <actions>
+            <action identifier="edit" label="Edit" type="auto" next-id="contributor2-review">
+               <trigger name="preserveCurrentUser"/>
+            </action>
+         </actions>
+      </step>
+      <step type="edit" identifier="contributor3-edition" label="Edition Contributor3" default-user="Workflow Assigned">
+         <actions>
+            <action identifier="backtoeditor3" label="Edit" type="auto" next-id="contributor3-review">
+               <trigger name="preserveCurrentUser"/>
+            </action>
+         </actions>
+      </step>
+      <step type="edit" identifier="approver-edition" label="Approver Edition" default-user="Workflow Assigned">
+         <actions>
+            <action identifier="approveredit" label="Edit" type="auto" next-id="approver-review">
+               <trigger name="preserveCurrentUser"/>
+            </action>
+         </actions>
+      </step>
+   </non-ordered-steps>
+</system-workflow-definition>

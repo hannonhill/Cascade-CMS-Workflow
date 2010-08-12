@@ -1,0 +1,158 @@
+<?xml version="1.0"?>
+<system-workflow-definition name="Approval with Publish Hold" initial-step="initialize">
+   <triggers>
+      <trigger name="email" class="com.cms.workflow.function.EmailProvider"/>
+      <trigger name="publish" class="com.cms.workflow.function.Publisher"/>
+      <trigger name="merge" class="com.cms.workflow.function.Merge"/>
+      <trigger name="assignToWorkflowOwner" class="com.cms.workflow.function.AssignToWorkflowOwner"/>
+      <trigger name="preserveCurrentUser" class="com.cms.workflow.function.PreserveCurrentUser"/>
+      <trigger name="version" class="com.cms.workflow.function.Version"/>
+      <trigger name="assignToGroup" class="com.cms.workflow.function.AssignToSpecifiedGroup"/>
+   </triggers>
+   <steps>
+      <!-- First step required in order to assign second step to workflow owner (initializing user) -->
+      <step type="system" identifier="initialize" label="Initialize">
+         <actions>
+            <action identifier="assign-to-owner" label="Assign to owner" move="forward" type="auto">
+               <trigger name="assignToWorkflowOwner"/>
+            </action>
+         </actions>
+      </step>
+      <!-- Give wf owner the choice to edit again (by going to separate edit step) or proceed with approval -->
+      <step type="transition" identifier="owner-hold" label="Owner deciding to submit or save" default-user="Workflow Assigned">
+         <actions>
+            <action identifier="owner-self-edit" label="Continue editing" next-id="owner-self-edit">
+               <trigger name="preserveCurrentUser"/>
+            </action>
+            <action identifier="to-approver" label="Submit to approver" move="forward">
+               <trigger name="email"/>
+            </action>
+         </actions>
+      </step>
+      <!-- Approver (in group Approvers) chooses to send back to owner for changes, edit themselves, approve and publish, or approve but hold for publishing  -->
+      <step type="transition" identifier="approver-hold" label="Approver deciding to publish or review" default-group="Approvers">
+         <actions>
+            <action identifier="return-to-owner" label="Request changes from owner" next-id="owner-edit-for-approver">
+               <trigger name="email"/>
+               <trigger name="assignToWorkflowOwner"/>
+            </action>
+            <action identifier="approver-edit" label="Edit yourself right now" next-id="approver-self-edit">
+               <trigger name="preserveCurrentUser"/>
+            </action>
+            <action identifier="approve-and-publish" label="Approve and publish to PRODUCTION" next-id="publish">
+               <trigger name="merge"/>
+               <trigger name="version"/>
+            </action>
+            <action identifier="approve-and-publish" label="Publish to STAGING only and return to this menu" next-id="publish-staging-working-copy">
+        </action>
+            <action identifier="approve-but-hold" label="Approve but Hold before Publishing" move="forward">
+               <trigger name="merge"/>
+               <trigger name="version"/>
+               <trigger name="preserveCurrentUser"/>
+               <!-- 
+                  Comment the above trigger and uncomment the following trigger
+                  to reassign the Holding for Publish step to the Approvers group
+                  instead of the user owning this step.
+               -->
+               <!--
+                <trigger name="assignToGroup">
+                  <parameter>
+                    <name>group</name>
+                    <value>Approvers</value>
+                  </parameter>
+                </trigger>
+                -->
+            </action>
+         </actions>
+      </step>
+      <step type="transition" identifier="hold-before-publish" label="Holding for Publish" default-group="Approvers">
+         <actions>
+            <action identifier="finalize" label="Publish Now to PRODUCTION" move="forward"/>
+            <action identifier="finalize" label="Publish Now to STAGING only" next-id="publish-staging"/>
+            <action identifier="back-to-approval" label="Back to Approver Choices" next-id="approver-hold">
+               <trigger name="preserveCurrentUser"/>
+            </action>
+         </actions>
+      </step>
+      <step type="system" identifier="publish" label="Publishing">
+         <actions>
+            <action identifier="publish" label="Completed" type="auto" move="forward">
+               <!-- Publish to all enabled Destinations -->
+               <trigger name="publish"/>
+               <trigger name="email">
+                  <parameter>
+                     <name>mode</name>
+                     <value>completed</value>
+                  </parameter>
+               </trigger>
+            </action>
+         </actions>
+      </step>
+      <step type="system" identifier="finish" label="Finished"/>
+   </steps>
+   <non-ordered-steps>
+      <step type="edit" identifier="approver-self-edit" label="Approver making changes" default-user="Workflow Assigned">
+         <actions>
+            <action identifier="back-to-approver-hold" label="Edit and back to menu" next-id="approver-hold"/>
+         </actions>
+      </step>
+      <step type="edit" identifier="owner-edit-for-approver" label="Owner making changes at request of approver" default-user="Workflow Assigned">
+         <actions>
+            <action identifier="make-choice" label="Edit and go to menu of choices" next-id="after-owner-edit">
+               <trigger name="preserveCurrentUser"/>
+            </action>
+         </actions>
+      </step>
+      <step type="transition" identifier="after-owner-edit" label="Owner choosing where to go next" default-user="Workflow Assigned">
+         <actions>
+            <action identifier="back-to-approver-hold" label="Edit and return to approver" next-id="approver-hold">
+               <trigger name="email"/>
+            </action>
+            <action identifier="back-to-owner-hold" label="Edit and back to owner menu" next-id="owner-hold"/>
+         </actions>
+      </step>
+      <step type="edit" identifier="owner-self-edit" label="Owner making changes" default-user="Workflow Assigned">
+         <actions>
+            <action identifier="back-to-owner-hold" label="Edit and back to menu" next-id="owner-hold"/>
+         </actions>
+      </step>
+      <step type="system" identifier="publish-staging" label="Publishing to STAGING server only">
+         <actions>
+            <action identifier="publish" label="Completed" type="auto" next-id="finish">
+               <trigger name="publish">
+                  <parameter>
+                     <name>destination</name>
+                     <value>Staging</value>
+                  </parameter>
+               </trigger>
+               <trigger name="email">
+                  <parameter>
+                     <name>mode</name>
+                     <value>completed</value>
+                  </parameter>
+               </trigger>
+            </action>
+         </actions>
+      </step>
+      <step type="system" identifier="publish-staging-working-copy" label="Publishing to STAGING server only (working copy)">
+         <actions>
+            <action identifier="publish" label="Completed" type="auto" next-id="approver-hold">
+               <trigger name="publish">
+                  <parameter>
+                     <name>destination</name>
+                     <value>Staging</value>
+                  </parameter>
+                  <parameter>
+                     <name>publish-working-copy</name>
+                     <value>true</value>
+                  </parameter>
+                  <parameter>
+                     <name>authorizing-type</name>
+                     <value>current-step-owner</value>
+                  </parameter>
+               </trigger>
+            </action>
+         </actions>
+      </step>
+   </non-ordered-steps>
+</system-workflow-definition>

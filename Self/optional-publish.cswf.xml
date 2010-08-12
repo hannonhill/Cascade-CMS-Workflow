@@ -1,0 +1,64 @@
+<?xml version="1.0"?>
+<system-workflow-definition name="Optional Publish (Owner Choice)" initial-step="initialize">
+   <triggers>
+      <trigger class="com.cms.workflow.function.Merge" name="merge"/>
+      <trigger class="com.cms.workflow.function.Publisher" name="publish"/>
+      <trigger class="com.cms.workflow.function.PublishSetTrigger" name="publishSet"/>
+      <trigger class="com.cms.workflow.function.EmailProvider" name="email"/>
+      <trigger class="com.cms.workflow.function.Version" name="version"/>
+      <trigger class="com.cms.workflow.function.AssignToWorkflowOwner" name="assignToOwner"/>
+      <trigger class="com.cms.workflow.function.PreserveCurrentUser" name="preserveCurrentUser"/>
+   </triggers>
+   <steps>
+      <step identifier="initialize" label="Initialize" type="system">
+         <actions>
+            <action identifier="assign" label="Assign to workflow owner" type="auto" move="forward">
+               <trigger name="assignToOwner"/>
+            </action>
+         </actions>
+      </step>
+      <!-- Preceding initialization step assigns this step to the workflow owner -->
+      <step identifier="save-publish-choice" label="Save or Save/Publish" type="transition" default-user="Workflow Assigned">
+         <actions>
+            <action identifier="save" label="Save only - do not publish" next-id="save-only">
+                </action>
+            <action identifier="publish" label="Save and publish" move="forward">
+                </action>
+            <action identifier="edit" label="Edit the Asset" next-id="editing">
+               <trigger name="preserveCurrentUser"/>
+            </action>
+         </actions>
+      </step>
+      <step identifier="saving" label="Save the asset" type="system">
+         <actions>
+            <action identifier="save" label="Save" move="forward" type="auto">
+               <trigger name="version"/>
+               <trigger name="merge"/>
+            </action>
+         </actions>
+      </step>
+      <step identifier="publishing" label="Publish the asset" type="system">
+         <actions>
+            <action identifier="publish" label="Publish" move="forward" type="auto">
+               <trigger name="publish"/>
+            </action>
+         </actions>
+      </step>
+      <step identifier="finished" label="Finished" type="system"/>
+   </steps>
+   <non-ordered-steps>
+      <step identifier="editing" label="Workflow owner makes changes" default-user="Workflow Assigned" type="edit">
+         <actions>
+            <action identifier="edit" label="Make changes" next-id="save-publish-choice" type="auto"/>
+         </actions>
+      </step>
+      <step identifier="save-only" label="Save only - do not publish" type="system">
+         <actions>
+            <action identifier="save" label="Saving changes" next-id="finished" type="auto">
+               <trigger name="version"/>
+               <trigger name="merge"/>
+            </action>
+         </actions>
+      </step>
+   </non-ordered-steps>
+</system-workflow-definition>

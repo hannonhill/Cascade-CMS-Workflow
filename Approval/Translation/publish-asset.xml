@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<system-workflow-definition name="Publish Asset" initial-step="initialize">
+   <triggers>
+      <trigger name="publish" class="com.cms.workflow.function.Publisher" />
+   </triggers>
+   <steps>
+      <step identifier="initialize" label="Initialization" type="system">
+      	<actions>
+      		<action identifier="initialize" label="Initialization" move="forward" type="auto">
+      			<trigger name="publish" />
+      		</action>
+      	</actions>
+      </step>
+      <step identifier="finished" label="Finished" type="system" />
+   </steps>
+   <non-ordered-steps/>
+</system-workflow-definition>

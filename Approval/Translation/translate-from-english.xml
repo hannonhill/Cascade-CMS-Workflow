@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<system-workflow-definition name="Translate from English" initial-step="initialize">
+   <triggers>
+      <trigger name="merge" class="com.cms.workflow.function.Merge" />
+      <trigger name="version" class="com.cms.workflow.function.Version" />
+      <trigger name="publish" class="com.cms.workflow.function.Publisher" />
+      <trigger name="preserveCurrentUser" class="com.cms.workflow.function.PreserveCurrentUser" />
+      <trigger name="assignToOwner" class="com.cms.workflow.function.AssignToWorkflowOwner" />
+      <trigger name="email" class="com.cms.workflow.function.EmailProvider" />
+      <trigger name="createNewWorkflow" class="com.cms.workflow.function.CreateNewWorkflowsTrigger" />
+      <trigger name="assignToGroup" class="com.cms.workflow.function.AssignToSpecifiedGroup" />
+   </triggers>
+   <steps>
+      <step identifier="initialize" label="Initialization" type="system">
+      	<actions>
+      		<action identifier="initialize" label="Initialization" move="forward" type="auto">
+      			<trigger name="assignToOwner" />
+      		</action>
+      	</actions>
+      </step>
+      <step identifier="owner-hold" label="Owner Holding" type="transition" default-group="Assigned by Workflow">
+      	<actions>
+      		<action identifier="owner-hold-edition" label="Continue editing" next-id="owner-hold-edition">
+      			<trigger name="assignToOwner" />
+      		</action>
+      		<action identifier="submit" label="Submit for Approval/Feedback" move="forward">
+      			<trigger name="email" />
+      		</action>
+      	</actions>
+      </step>
+      <step identifier="approval" label="Approval" type="transition" default-group="English Approvers">
+      	<actions>
+				<action identifier="owner-edition" label="Return to owner for changes" next-id="owner-hold-edition">
+      			<trigger name="assignToOwner" />
+      			<trigger name="email" />
+      		</action>
+      		<action identifier="approval-edition" label="Edit the asset" next-id="approval-edition">
+      			<trigger name="preserveCurrentUser" />
+      		</action>
+      		<action identifier="submit" label="Approve for Translation" move="forward">
+      			<trigger name="version" />
+      			<trigger name="merge" />
+					<trigger name="email">
+						<parameter>
+						   <name>mode</name>
+						   <value>completed</value>
+						</parameter>
+					</trigger>
+					<trigger name="createNewWorkflow">
+	               <parameter>
+						   <name>base-folder</name>
+						   <value>/en</value>
+						</parameter>
+                  <parameter>
+                     <name>invoked-workflow-definition-path</name>
+                     <value>/Translate to Spanish</value>
+                  </parameter>
+                  <parameter>
+                     <name>invoked-workflow-definition-site-name</name>
+                     <value>multi-lingual</value>
+                  </parameter>
+                  <parameter>
+                     <name>owner</name>
+                     <value>CURRENT</value>
+                  </parameter>
+                  <parameter>
+                     <name>folder-path</name>
+                     <value>/es</value>
+                  </parameter>
+					</trigger>
+      		</action>
+      	</actions>
+      </step>
+      <step identifier="finished" label="Finished" type="system" />
+   </steps>
+   <non-ordered-steps>
+   	<step identifier="owner-hold-edition" label="Owner Holding" type="edit" default-group="Assigned by Workflow">
+      	<actions>
+      		<action identifier="edit" label="Edit the asset" next-id="owner-hold">
+      			<trigger name="assignToOwner" />
+      		</action>
+      	</actions>
+      </step>
+   	<step identifier="approval-edition" label="Owner Holding" type="edit" default-group="Assigned by Workflow">
+      	<actions>
+      		<action identifier="edit" label="Edit the asset" next-id="approval">
+      			<trigger name="preserveCurrentUser" />
+      		</action>
+      	</actions>
+      </step>
+   </non-ordered-steps>
+</system-workflow-definition>

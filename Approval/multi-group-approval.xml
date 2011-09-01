@@ -1,0 +1,105 @@
+<system-workflow-definition name="4 Step Approve" initial-step="initialize" >
+  <triggers>
+    <trigger name="assignStepIfUser" class="com.cms.workflow.function.AssignStepIfUser" />
+    <trigger name="assignToGroupOwningAsset" class="com.cms.workflow.function.AssignToGroupOwningAsset" />
+    <trigger name="com.cms.workflow.function.AssignToSpecifiedGroup" class="com.cms.workflow.function.AssignToSpecifiedGroup" />
+    <trigger name="assignToWorkflowOwner" class="com.cms.workflow.function.AssignToWorkflowOwner" />
+    <trigger name="com.cms.workflow.function.CopyFolder" class="com.cms.workflow.function.CopyFolder" />
+    <trigger name="com.cms.workflow.function.CreateNewWorkflowTrigger" class="com.cms.workflow.function.CreateNewWorkflowTrigger" />
+    <trigger name="delete" class="com.cms.workflow.function.Delete" />
+    <trigger name="deleteAndUnpublish" class="com.cms.workflow.function.DeleteAndUnpublish" />
+    <trigger name="com.cms.workflow.function.DeleteParentFolderTrigger" class="com.cms.workflow.function.DeleteParentFolderTrigger" />
+    <trigger name="email" class="com.cms.workflow.function.EmailProvider" />
+    <trigger name="merge" class="com.cms.workflow.function.Merge" />
+    <trigger name="preserveCurrentUser" class="com.cms.workflow.function.PreserveCurrentUser" />
+    <trigger name="com.cms.workflow.function.PublishContainingPublishSetTrigger" class="com.cms.workflow.function.PublishContainingPublishSetTrigger" />
+    <trigger name="com.cms.workflow.function.PublishParentFolderTrigger" class="com.cms.workflow.function.PublishParentFolderTrigger" />
+    <trigger name="publishSet" class="com.cms.workflow.function.PublishSetTrigger" />
+    <trigger name="publish" class="com.cms.workflow.function.Publisher" />
+    <trigger name="version" class="com.cms.workflow.function.Version" />
+  </triggers>
+  <steps>
+    <step type="system" identifier="initialize" label="Initialize" >
+      <actions>
+        <action identifier="initialize" label="Initialize" move="forward" />
+      </actions>
+    </step>
+    <step type="transition" identifier="review-approver" label="Approver Review" default-group="Approvers" >
+      <actions>
+        <action identifier="approve" label="Approve" move="forward" />
+        <action identifier="send-back" label="Send back to owner" next-id="edit-owner" move="forward" >
+          <trigger name="assignToWorkflowOwner" />
+        </action>
+        <action identifier="deny" label="Deny" next-id="finish" move="next_id" >
+          <trigger name="email" />
+        </action>
+        <action identifier="edit" label="Edit now" next-id="edit-approver" move="next_id" >
+          <trigger name="preserveCurrentUser" />
+        </action>
+      </actions>
+    </step>
+    <step type="transition" identifier="review-publisher" label="Publisher Review" default-group="Publishers" >
+      <actions>
+        <action identifier="send-back" label="Send back to Approvers" next-id="review-approver" move="next_id" />
+        <action identifier="approve" label="Approve" move="forward" />
+        <action identifier="deny" label="Deny" next-id="finish" move="next_id" >
+          <trigger name="email" />
+        </action>
+        <action identifier="edit" label="Edit now" next-id="edit-publisher" move="next_id" >
+          <trigger name="preserveCurrentUser" />
+        </action>
+      </actions>
+    </step>
+    <step type="transition" identifier="review-manager" label="Manager Review" default-group="Managers" >
+      <actions>
+        <action identifier="edit" label="Edit now" next-id="edit-manager" move="next_id" >
+          <trigger name="preserveCurrentUser" />
+        </action>
+        <action identifier="send-back" label="Send back to Publisher" next-id="review-publisher" move="next_id" />
+        <action identifier="deny" label="Deny" next-id="finish" move="next_id" >
+          <trigger name="email" />
+        </action>
+        <action identifier="approve" label="Approve" move="forward" />
+      </actions>
+    </step>
+    <step type="system" identifier="finalize" label="Finalize" >
+      <actions>
+        <action identifier="finalize" label="Finalize" move="forward" >
+          <trigger name="merge" />
+          <trigger name="email" />
+        </action>
+      </actions>
+    </step>
+    <step type="system" identifier="finish" label="Finish" />
+  </steps>
+  <non-ordered-steps>
+    <step type="edit" identifier="edit-owner" label="Owner Edit" default-user="admin" >
+      <actions>
+        <action identifier="edit" label="Edit" next-id="review-approver" move="next_id" >
+          <trigger name="email" />
+        </action>
+      </actions>
+    </step>
+    <step type="edit" identifier="edit-approver" label="Approver Edit" default-user="admin" >
+      <actions>
+        <action identifier="edit" label="Edit" next-id="review-approver" move="next_id" >
+          <trigger name="email" />
+        </action>
+      </actions>
+    </step>
+    <step type="edit" identifier="edit-manager" label="Manager Edit" default-user="admin" >
+      <actions>
+        <action identifier="edit" label="Edit" next-id="review-manager" move="next_id" >
+          <trigger name="email" />
+        </action>
+      </actions>
+    </step>
+    <step type="edit" identifier="edit-publisher" label="Publisher Edit" default-user="admin" >
+      <actions>
+        <action identifier="edit" label="Edit" next-id="review-publisher" move="next_id" >
+          <trigger name="email" />
+        </action>
+      </actions>
+    </step>
+  </non-ordered-steps>
+</system-workflow-definition>

@@ -78,6 +78,10 @@
                             <name>authorizing-type</name>
                             <value>system</value>
                         </parameter>
+                        <parameter>
+                            <name>destination</name>
+                            <value>/test.mysite.edu,/mysite.edu</value>
+                        </parameter>
                     </trigger>
                     <trigger name="Email">
                         <parameter>

@@ -40,8 +40,8 @@
     <step type="system" identifier="finalize-edit" label="Finalizing" >
       <actions>
         <action identifier="finalize" label="Finish Workflow" type="auto" move="forward" >
-          <trigger name="merge" />
           <trigger name="version" />
+	  <trigger name="merge" />
         </action>
       </actions>
     </step>

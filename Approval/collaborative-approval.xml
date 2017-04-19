@@ -2,6 +2,7 @@
 <system-workflow-definition name="Collaborative Approval" initial-step="initialize">
    <triggers>
       <trigger name="merge" class="com.cms.workflow.function.Merge"/>
+      <trigger name="version" class="com.cms.workflow.function.Version"/>
       <trigger name="preserveCurrentUser" class="com.cms.workflow.function.PreserveCurrentUser"/>
       <trigger name="email" class="com.cms.workflow.function.EmailProvider"/>
       <trigger name="assignToOwner" class="com.cms.workflow.function.AssignToWorkflowOwner"/>
@@ -93,6 +94,7 @@
          <actions>
             <action identifier="publish" label="Save and publish" next-id="finalize"/>
             <action identifier="no-publish" label="Save but do not publish" next-id="finish">
+               <trigger name="version"/>
                <trigger name="merge"/>
             </action>
          </actions>
@@ -102,6 +104,7 @@
       <step type="system" identifier="finalize" label="Finalizing">
          <actions>
             <action identifier="merge" label="Merge" type="auto" move="forward">
+               <trigger name="version"/>
                <trigger name="merge"/>
             </action>
          </actions>

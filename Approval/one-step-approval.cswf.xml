@@ -32,8 +32,8 @@
       <step type="system" identifier="save-and-publish" label="Save and Publish">
          <actions>
             <action identifier="save-and-publish" label="nothing" move="forward" type="auto">
-               <trigger name="merge"/>
                <trigger name="version"/>
+	       <trigger name="merge"/>
                <trigger name="publish"/>
                <trigger name="email">
                   <parameter>

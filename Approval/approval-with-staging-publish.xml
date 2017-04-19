@@ -49,8 +49,8 @@
         <step type="system" identifier="finalize" label="Finalize">
             <actions>
                 <action identifier="finalize" label="Finalize" move="forward">
-                    <trigger name="Merge"/>
                     <trigger name="Version"/>
+                    <trigger name="Merge"/>
                 </action>
             </actions>
         </step>

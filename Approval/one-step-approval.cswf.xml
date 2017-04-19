@@ -6,6 +6,7 @@
       <trigger name="assign-to-owner" class="com.cms.workflow.function.AssignToWorkflowOwner"/>
       <trigger name="preserve-current-user" class="com.cms.workflow.function.PreserveCurrentUser"/>
       <trigger name="merge" class="com.cms.workflow.function.Merge"/>
+      <trigger name="version" class="com.cms.workflow.function.Version"/>
       <trigger name="assign-to-group" class="com.cms.workflow.function.AssignToSpecifiedGroup"/>
    </triggers>
    <steps>

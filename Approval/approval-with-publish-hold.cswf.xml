@@ -40,14 +40,14 @@
                <trigger name="preserveCurrentUser"/>
             </action>
             <action identifier="approve-and-publish" label="Approve and publish to PRODUCTION" next-id="publish">
-               <trigger name="merge"/>
                <trigger name="version"/>
+               <trigger name="merge"/>
             </action>
             <action identifier="approve-and-publish" label="Publish to STAGING only and return to this menu" next-id="publish-staging-working-copy">
         </action>
             <action identifier="approve-but-hold" label="Approve but Hold before Publishing" move="forward">
-               <trigger name="merge"/>
                <trigger name="version"/>
+               <trigger name="merge"/>
                <trigger name="preserveCurrentUser"/>
                <!-- 
                   Comment the above trigger and uncomment the following trigger

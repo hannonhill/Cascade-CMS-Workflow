@@ -65,6 +65,7 @@
     <step type="system" identifier="finalize" label="Finalize" >
       <actions>
         <action identifier="finalize" label="Finalize" move="forward" >
+          <trigger name="version"/>
           <trigger name="merge" />
           <trigger name="email" />
         </action>

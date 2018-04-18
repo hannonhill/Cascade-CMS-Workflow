@@ -20,9 +20,11 @@
   </triggers>
   <steps>
     <step type="system" identifier="initialize" label="Initialize" >
-      <actions>
-        <action identifier="initialize" label="Initialize" move="forward" />
-      </actions>
+			<actions>
+				<action identifier="initialize" label="Initialize" move="forward" >
+					<trigger name="Email" />
+				</action>
+			</actions>
     </step>
     <step type="transition" identifier="approve" label="Approve" default-group="Approvers" >
       <actions>

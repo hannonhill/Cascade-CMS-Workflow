@@ -1,0 +1,74 @@
+<system-workflow-definition initial-step="initialize" >
+	<triggers>
+		<trigger name="AssignStepIfUser" class="com.cms.workflow.function.AssignStepIfUser" />
+		<trigger name="AssignToGroupOwningAsset" class="com.cms.workflow.function.AssignToGroupOwningAsset" />
+		<trigger name="AssignToSpecifiedGroup" class="com.cms.workflow.function.AssignToSpecifiedGroup" />
+		<trigger name="AssignToWorkflowOwner" class="com.cms.workflow.function.AssignToWorkflowOwner" />
+		<trigger name="CopyFolder" class="com.cms.workflow.function.CopyFolder" />
+		<trigger name="CreateNewWorkflow" class="com.cms.workflow.function.CreateNewWorkflowsTrigger" />
+		<trigger name="Delete" class="com.cms.workflow.function.Delete" />
+		<trigger name="UnpublishAndDelete" class="com.cms.workflow.function.DeleteAndUnpublish" />
+		<trigger name="DeleteParentFolder" class="com.cms.workflow.function.DeleteParentFolderTrigger" />
+		<trigger name="Email" class="com.cms.workflow.function.EmailProvider" />
+		<trigger name="Merge" class="com.cms.workflow.function.Merge" />
+		<trigger name="PreserveCurrentUser" class="com.cms.workflow.function.PreserveCurrentUser" />
+		<trigger name="PublishContainingPublishSet" class="com.cms.workflow.function.PublishContainingPublishSetTrigger" />
+		<trigger name="PublishParentFolder" class="com.cms.workflow.function.PublishParentFolderTrigger" />
+		<trigger name="PublishSet" class="com.cms.workflow.function.PublishSetTrigger" />
+		<trigger name="Publish" class="com.cms.workflow.function.Publisher" />
+		<trigger name="Version" class="com.cms.workflow.function.Version" />
+	</triggers>
+	<steps>
+		<step type="system" identifier="initialize" label="Initialize" >
+			<actions>
+				<action identifier="initialize" label="Initialize" move="forward" >
+					<trigger name="Email" />
+				</action>
+			</actions>
+		</step>
+		<step type="transition" identifier="approve" label="Approve" default-group="Approvers" >
+			<actions>
+				<action identifier="reject" label="Request Changes" next-id="owner-edit" >
+					<trigger name="Email" />
+					<trigger name="AssignToWorkflowOwner" />
+				</action>
+				<action identifier="approve" label="Approve and Publish" move="forward" />
+				<action identifier="edit" label="Edit" next-id="approver-edit" >
+					<trigger name="PreserveCurrentUser" />
+				</action>
+			</actions>
+		</step>
+		<step type="system" identifier="save-and-publish" label="Save and Publish" >
+			<actions>
+				<action identifier="save-and-publish" label="Save and Publish" move="forward" >
+					<trigger name="Version" />
+					<trigger name="Merge" />
+					<trigger name="Publish" />
+					<trigger name="Email" >
+						<parameter>
+							<name>mode</name>
+							<value>completed</value>
+						</parameter>
+					</trigger>
+				</action>
+			</actions>
+		</step>
+		<step type="system" identifier="finished" label="Finished" />
+	</steps>
+	<non-ordered-steps>
+		<step type="edit" identifier="approver-edit" label="Approver Edit" default-user="Workflow Assigned" >
+			<actions>
+				<action identifier="approver-edit" label="Approver Edit" next-id="approve" >
+					<trigger name="PreserveCurrentUser" />
+				</action>
+			</actions>
+		</step>
+		<step type="edit" identifier="owner-edit" label="Owner Edit" default-user="Workflow Assigned" >
+			<actions>
+				<action identifier="owner-edit" label="Owner Edit" next-id="approve" >
+					<trigger name="Email" />
+				</action>
+			</actions>
+		</step>
+	</non-ordered-steps>
+</system-workflow-definition>

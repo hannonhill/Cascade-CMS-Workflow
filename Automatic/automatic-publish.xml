@@ -28,6 +28,18 @@
         </action>
       </actions>
     </step>
+    <step type="system" identifier="publish-set" label="Publish Set" >
+      <actions>
+        <action identifier="publish" label="Publish" move="forward" >
+          <trigger name="PublishSet" >
+            <parameter>
+              <name>name</name>
+              <value>/Publish Set Name</value>
+            </parameter>
+          </trigger>
+        </action>
+      </actions>
+    </step>
     <step type="system" identifier="finished" label="Finished" />
   </steps>
   <non-ordered-steps/>

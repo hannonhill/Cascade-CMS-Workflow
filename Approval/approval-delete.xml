@@ -1,0 +1,45 @@
+<system-workflow-definition initial-step="initialize" >
+  <triggers>
+    <trigger name="AssignStepIfUser" class="com.cms.workflow.function.AssignStepIfUser" />
+    <trigger name="AssignToGroupOwningAsset" class="com.cms.workflow.function.AssignToGroupOwningAsset" />
+    <trigger name="AssignToSpecifiedGroup" class="com.cms.workflow.function.AssignToSpecifiedGroup" />
+    <trigger name="AssignToWorkflowOwner" class="com.cms.workflow.function.AssignToWorkflowOwner" />
+    <trigger name="CopyFolder" class="com.cms.workflow.function.CopyFolder" />
+    <trigger name="CreateNewWorkflow" class="com.cms.workflow.function.CreateNewWorkflowsTrigger" />
+    <trigger name="Delete" class="com.cms.workflow.function.Delete" />
+    <trigger name="UnpublishAndDelete" class="com.cms.workflow.function.DeleteAndUnpublish" />
+    <trigger name="DeleteParentFolder" class="com.cms.workflow.function.DeleteParentFolderTrigger" />
+    <trigger name="Email" class="com.cms.workflow.function.EmailProvider" />
+    <trigger name="Merge" class="com.cms.workflow.function.Merge" />
+    <trigger name="PreserveCurrentUser" class="com.cms.workflow.function.PreserveCurrentUser" />
+    <trigger name="PublishContainingPublishSet" class="com.cms.workflow.function.PublishContainingPublishSetTrigger" />
+    <trigger name="PublishParentFolder" class="com.cms.workflow.function.PublishParentFolderTrigger" />
+    <trigger name="PublishSet" class="com.cms.workflow.function.PublishSetTrigger" />
+    <trigger name="Publish" class="com.cms.workflow.function.Publisher" />
+    <trigger name="Version" class="com.cms.workflow.function.Version" />
+  </triggers>
+  <steps>
+    <step type="system" identifier="initialize" label="Initialize" >
+			<actions>
+				<action identifier="initialize" label="Initialize" move="forward" >
+					<trigger name="Email" />
+				</action>
+			</actions>
+    </step>
+    <step type="transition" identifier="approve" label="Approve" default-group="Approvers" >
+      <actions>
+        <action identifier="reject" label="Reject" move="forward" />
+        <action identifier="unpublish-and-delete" label="Unpublish and Delete" move="forward" >
+          <trigger name="UnpublishAndDelete" >
+            <parameter>
+              <name>authorizing-type</name>
+              <value>current-step-owner</value>
+            </parameter>
+          </trigger>
+        </action>
+      </actions>
+    </step>
+    <step type="system" identifier="finished" label="Finished" />
+  </steps>
+  <non-ordered-steps/>
+</system-workflow-definition>

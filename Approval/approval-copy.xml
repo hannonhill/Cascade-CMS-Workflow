@@ -28,7 +28,7 @@
      </step>
      <step type="edit" identifier="edit" label="Edit">
         <actions>
-           <step type="edit" identifier="edit" label="Edit" default-user="Workflow Assigned" >
+           <action type="edit" identifier="edit" label="Edit" default-user="Workflow Assigned" >
               <trigger name="Email"/>
            </action>
         </actions>

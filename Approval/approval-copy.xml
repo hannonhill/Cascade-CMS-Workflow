@@ -26,12 +26,12 @@
            </action>
         </actions>
      </step>
-     <step type="edit" identifier="edit" label="Edit">
-        <actions>
-           <action type="edit" identifier="edit" label="Edit" default-user="Workflow Assigned" >
-              <trigger name="Email"/>
-           </action>
-        </actions>
+     <step type="edit" identifier="edit" label="Edit" default-user="Workflow Assigned" >
+       <actions>
+         <action identifier="edit" label="Edit" move="forward" >
+           <trigger name="Email" />
+         </action>
+       </actions>
      </step>
      <step type="transition" identifier="approve" label="Approve" default-group="Approvers">
         <actions>

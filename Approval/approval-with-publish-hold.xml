@@ -46,8 +46,6 @@
             <action identifier="approve-and-publish" label="Publish to STAGING only and return to this menu" next-id="publish-staging-working-copy">
         </action>
             <action identifier="approve-but-hold" label="Approve but Hold before Publishing" move="forward">
-               <trigger name="version"/>
-               <trigger name="merge"/>
                <trigger name="preserveCurrentUser"/>
                <!-- 
                   Comment the above trigger and uncomment the following trigger
@@ -67,7 +65,10 @@
       </step>
       <step type="transition" identifier="hold-before-publish" label="Holding for Publish" default-group="Approvers">
          <actions>
-            <action identifier="finalize" label="Publish Now to PRODUCTION" move="forward"/>
+            <action identifier="finalize" label="Publish Now to PRODUCTION" move="forward">
+               <trigger name="version"/>
+               <trigger name="merge"/>
+            </action>
             <action identifier="finalize" label="Publish Now to STAGING only" next-id="publish-staging"/>
             <action identifier="back-to-approval" label="Back to Approver Choices" next-id="approver-hold">
                <trigger name="preserveCurrentUser"/>

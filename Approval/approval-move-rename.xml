@@ -32,7 +32,7 @@
 				<action identifier="reject" label="Reject" next-id="finished" ></action>
 			</actions>
 		</step>
-		<step type="system" identifier="unpublish" label="Unublish" >
+		<step type="system" identifier="unpublish" label="Unpublish" >
 			<actions>
 				<action identifier="unpublish" label="Unpublish" move="forward" >
 					<trigger name="Publish" >
